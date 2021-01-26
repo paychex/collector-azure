@@ -1,6 +1,6 @@
 {
     "name": "@paychex/collector-azure",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Provides an Azure Event Bus collector for use with a @paychex/core Tracker.",
     "main": "index.js",
     "type": "module",

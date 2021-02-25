@@ -4,8 +4,8 @@
  * @module index
  */
 
-import * as AzureEvents from '@azure/event-hubs';
 import { pull, noop, identity } from 'lodash-es';
+import { EventHubProducerClient } from '@azure/event-hubs';
 
 function CONSOLE_LOGGER(info) {
     const label = info.label;
@@ -16,7 +16,7 @@ function CONSOLE_LOGGER(info) {
 }
 
 function AZURE_EVENTHUB_PROVIDER(connection, name) {
-    return new AzureEvents.EventHubProducerClient(connection, name);
+    return new EventHubProducerClient(connection, name);
 }
 
 /**

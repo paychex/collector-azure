@@ -4,13 +4,8 @@
  * @module index
  */
 
-import pull from 'lodash/pull.js';
-import noop from 'lodash/noop.js';
-import identity from 'lodash/identity.js';
-
-import AzureEvents from '@azure/event-hubs';
-
-import { error, ignore } from '@paychex/core/errors/index.js';
+import * as AzureEvents from '@azure/event-hubs';
+import { pull, noop, identity } from 'lodash-es';
 
 function CONSOLE_LOGGER(info) {
     const label = info.label;
@@ -29,7 +24,7 @@ function AZURE_EVENTHUB_PROVIDER(connection, name) {
  * Azure EventHub in batches. Uses known size and constraint limitations to
  * ensure events reach the hub, and retries if any failures occur.
  *
- * @function eventHubs
+ * @function
  * @param {object} options The options required to create the EventHub.
  * @param {string} options.name The name of the Event Hub to connect to.
  * @param {string} options.connection The full connection string of the Event Hub to connect to.
@@ -38,15 +33,12 @@ function AZURE_EVENTHUB_PROVIDER(connection, name) {
  * as a normal JSON object.
  * @returns {function} A collector that can be passed to @paychex/core's `createTracker` method.
  * @example
- * import createTracker from '@paychex/core/tracker/index.js';
- * import eventHubs from '@paychex/collector-azure/index.js';
- *
  * const hub = eventHubs({
  *   name: process.env.HUB_NAME,
  *   connection: process.env.HUB_CONNECTION
  * });
  *
- * const tracker = createTracker(hub);
+ * const tracker = trackers.create(hub);
  *
  * // this data will be sent to the EventHub
  * tracker.event('label', { optional: 'data' });
@@ -55,7 +47,7 @@ function AZURE_EVENTHUB_PROVIDER(connection, name) {
  * // you can force an immediate send by calling flush:
  * hub.flush();
  */
-export default function eventHubs({
+export function eventHubs({
     name,
     connection,
     formatter = identity,
@@ -73,7 +65,7 @@ export default function eventHubs({
 
     async function connectHubs() {
         if (!name || !connection)
-            throw error('An EventHub name and connection string are required. Logging to console instead.', ignore());
+            console.warn('An EventHub name and connection string are required. Logging to console instead.');
         if (hub)
             await hub.close().catch(noop);
         hub = provider(connection, name);

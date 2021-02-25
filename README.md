@@ -8,6 +8,38 @@ Provides an Azure Event Bus collector for use with a [@paychex/core](https://git
 npm install @paychex/collector-azure
 ```
 
+## Importing
+
+### esm
+
+```js
+import { eventHubs } from '@paychex/collector-azure';
+```
+
+### cjs
+
+```js
+const { eventHubs } = require('@paychex/collector-azure');
+```
+
+### amd
+
+```js
+define(['@paychex/collector-azure'], function(collectors) { ... });
+define(['@paychex/collector-azure'], function({ eventHubs }) { ... });
+```
+
+```js
+require(['@paychex/collector-azure'], function(collectors) { ... });
+require(['@paychex/collector-azure'], function({ eventHubs }) { ... });
+```
+
+### iife (browser)
+
+```js
+const { eventHubs } = window['@paychex/collector-azure'];
+```
+
 ## Usage
 
 Construct a new Azure Event Hub collector for use in the `@paychex/core` Tracker by passing a configuration object with the following keys:
@@ -19,13 +51,13 @@ Construct a new Azure Event Hub collector for use in the `@paychex/core` Tracker
 | formatter | `Function` | _optional_ Function to use to format the `TrackingInfo` instance into an Azure Event Hub entry. |
 
 ```js
-import createTracker from '@paychex/core/tracker/index.js';
-import eventHubs from '@paychex/collector-azure/index.js';
+import { trackers } from '@paychex/core';
+import { eventHubs } from '@paychex/collector-azure';
 
 const hub = eventHubs({
   name: process.env.HUB_NAME,
   connection: process.env.HUB_CONNECTION
 });
 
-const tracker = createTracker(hub);
+const tracker = trackers.create(hub);
 ```

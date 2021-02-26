@@ -44,10 +44,8 @@
         "rimraf": "^3.0.2",
         "rollup": "^2.39.1"
     },
-    "dependencies": {
-        "@azure/event-hubs": "^5.3.1"
-    },
     "peerDependencies": {
+        "@azure/event-hubs": "^5.3.1",
         "lodash-es": "^4.17.21"
     }
 }

@@ -1,6 +1,5 @@
 const { nodeResolve } = require("@rollup/plugin-node-resolve");
 const commonjs = require('@rollup/plugin-commonjs');
-const replace = require('@rollup/plugin-replace');
 
 module.exports = [
     // ESM
@@ -25,12 +24,8 @@ module.exports = [
     // CJS
     {
         input: 'index.mjs',
-        external: ['lodash', '@azure/event-hubs'],
+        external: ['lodash-es', '@azure/event-hubs'],
         plugins: [
-            replace({
-                'lodash-es': 'lodash',
-                preventAssignment: true,
-            }),
             nodeResolve({
                 preferBuiltins: true,
             }),
@@ -43,6 +38,9 @@ module.exports = [
             format: "cjs",
             exports: "named",
             sourcemap: true,
+            paths: {
+                'lodash-es': 'lodash'
+            }
         },
     },
 ];

@@ -5,6 +5,7 @@ module.exports = [
     // ESM and CJS
     {
         input: 'index.mjs',
+        external: ['lodash-es'],
         plugins: [
             nodeResolve({
                 preferBuiltins: true,

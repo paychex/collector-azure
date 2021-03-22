@@ -8,6 +8,14 @@
         "dist",
         "docs"
     ],
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/paychex/collector-azure.git"
+    },
+    "bugs": {
+        "url": "https://github.com/paychex/collector-azure/issues"
+    },
+    "homepage": "https://paychex.github.io/collector-azure/",
     "scripts": {
         "test": "mocha --recursive",
         "coverage": "c8 --reporter=html mocha --recursive",

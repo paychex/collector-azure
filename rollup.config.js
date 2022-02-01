@@ -1,13 +1,18 @@
 const { nodeResolve } = require("@rollup/plugin-node-resolve");
 const commonjs = require('@rollup/plugin-commonjs');
+const typescript = require('@rollup/plugin-typescript');
+
 const pkg = require('./package.json');
 
 module.exports = [
     // ESM
     {
-        input: 'index.mjs',
-        external: ['lodash-es', '@azure/event-hubs'],
+        input: 'index.ts',
+        external: ['lodash', '@azure/event-hubs'],
         plugins: [
+            typescript({
+                tsconfig: './tsconfig.json',
+            }),
             nodeResolve({
                 preferBuiltins: true
             }),
@@ -16,7 +21,7 @@ module.exports = [
             })
         ],
         output: {
-            dir: "dist/esm",
+            file: pkg.module,
             format: "esm",
             exports: "named",
             sourcemap: true,
@@ -25,9 +30,12 @@ module.exports = [
     },
     // CJS
     {
-        input: 'index.mjs',
-        external: ['lodash-es', '@azure/event-hubs'],
+        input: 'index.ts',
+        external: ['lodash', '@azure/event-hubs'],
         plugins: [
+            typescript({
+                tsconfig: './tsconfig.json',
+            }),
             nodeResolve({
                 preferBuiltins: true,
             }),
@@ -36,14 +44,11 @@ module.exports = [
             })
         ],
         output: {
-            dir: "dist/cjs",
+            file: pkg.main,
             format: "cjs",
             exports: "named",
             sourcemap: true,
             banner: `/*! ${pkg.name} v${pkg.version} */`,
-            paths: {
-                'lodash-es': 'lodash'
-            }
         },
     },
 ];

@@ -13,31 +13,31 @@ npm install @paychex/collector-azure
 ### esm
 
 ```js
-import { eventHubs } from '@paychex/collector-azure';
+import { eventHub } from '@paychex/collector-azure';
 ```
 
 ### cjs
 
 ```js
-const { eventHubs } = require('@paychex/collector-azure');
+const { eventHub } = require('@paychex/collector-azure');
 ```
 
 ### amd
 
 ```js
 define(['@paychex/collector-azure'], function(collectors) { ... });
-define(['@paychex/collector-azure'], function({ eventHubs }) { ... });
+define(['@paychex/collector-azure'], function({ eventHub }) { ... });
 ```
 
 ```js
 require(['@paychex/collector-azure'], function(collectors) { ... });
-require(['@paychex/collector-azure'], function({ eventHubs }) { ... });
+require(['@paychex/collector-azure'], function({ eventHub }) { ... });
 ```
 
 ### iife (browser)
 
 ```js
-const { eventHubs } = window['@paychex/collector-azure'];
+const { eventHub } = window['@paychex/collector-azure'];
 ```
 
 ## Usage
@@ -52,9 +52,9 @@ Construct a new Azure Event Hub collector for use in the `@paychex/core` Tracker
 
 ```js
 import { trackers } from '@paychex/core';
-import { eventHubs } from '@paychex/collector-azure';
+import { eventHub } from '@paychex/collector-azure';
 
-const hub = eventHubs({
+const hub = eventHub({
   name: process.env.HUB_NAME,
   connection: process.env.HUB_CONNECTION
 });

@@ -1,13 +1,41 @@
 /**
  * Provides an Azure EventHubs collector that can be used with `@paychex/core` Tracker.
  *
- * @module index
+ * @module main
  */
 
-import { pull, noop, identity } from 'lodash-es';
-import { EventHubProducerClient } from '@azure/event-hubs';
+import { pull, noop, identity, defaults } from 'lodash';
+import { EventDataBatch, EventHubProducerClient } from '@azure/event-hubs';
 
-function CONSOLE_LOGGER(info) {
+import type { TrackingInfo, TrackingSubscriber } from '@paychex/core/types/trackers';
+export type { TrackingInfo, TrackingSubscriber }
+
+/** @ignore */
+export interface EventHubProvider {
+    (...args: any[]): EventHubProducerClient
+}
+
+export interface EventHubConfiguration {
+
+    /** The name of the Event Hub to connect to. */
+    name: string,
+
+    /** The full connection string of the Event Hub to connect to. */
+    connection: string,
+
+    /**
+     * The formatter to use to convert a TrackingInfo item into
+     * a payload suitable for the EventHub. If not provided, the
+     * entry will be persisted as a normal JSON object.
+     */
+    formatter?: (info: TrackingInfo) => Record<string, any>,
+
+    /** @ignore */
+    provider?: EventHubProvider
+
+}
+
+function CONSOLE_LOGGER(info: TrackingInfo): void {
     const label = info.label;
     const type = info.type.toUpperCase();
     const duration = info.duration > 0 ?
@@ -15,7 +43,7 @@ function CONSOLE_LOGGER(info) {
     console.log(`[${type}] ${label}${duration}`);
 }
 
-function AZURE_EVENTHUB_PROVIDER(connection, name) {
+function AZURE_EVENTHUB_PROVIDER(connection: string, name: string): EventHubProducerClient {
     return new EventHubProducerClient(connection, name);
 }
 
@@ -24,16 +52,11 @@ function AZURE_EVENTHUB_PROVIDER(connection, name) {
  * Azure EventHub in batches. Uses known size and constraint limitations to
  * ensure events reach the hub, and retries if any failures occur.
  *
- * @function
- * @param {object} options The options required to create the EventHub.
- * @param {string} options.name The name of the Event Hub to connect to.
- * @param {string} options.connection The full connection string of the Event Hub to connect to.
- * @param {function} [options.formatter] The formatter to use to convert a TrackingInfo
- * item into a payload suitable for the EventHub. If not provided, the entry will be persisted
- * as a normal JSON object.
- * @returns {function} A collector that can be passed to @paychex/core's `createTracker` method.
+ * @param options The options required to create the EventHub.
+ * @returns A collector that can be passed to @paychex/core's `createTracker` method.
  * @example
- * const hub = eventHubs({
+ * ```js
+ * const hub = eventHub({
  *   name: process.env.HUB_NAME,
  *   connection: process.env.HUB_CONNECTION
  * });
@@ -46,18 +69,24 @@ function AZURE_EVENTHUB_PROVIDER(connection, name) {
  * // we send events to the eventHub every 1 second;
  * // you can force an immediate send by calling flush:
  * hub.flush();
+ * ```
  */
-export function eventHubs({
-    name,
-    connection,
-    formatter = identity,
-    provider = AZURE_EVENTHUB_PROVIDER, // for testing purposes
-} = Object.create(null)) {
+export function eventHub(options: Partial<EventHubConfiguration> = Object.create(null)): TrackingSubscriber {
 
-    let hub = null;
-    const queue = [];
+    const {
+        name,
+        connection,
+        formatter,
+        provider,
+    } = defaults(options, {
+        formatter: identity,
+        provider: AZURE_EVENTHUB_PROVIDER,
+    });
 
-    function collect(info) {
+    let hub: EventHubProducerClient = null;
+    const queue: TrackingInfo[] = [];
+
+    function collect(info: TrackingInfo): void {
         hub ?
             queue.push(info) :
             CONSOLE_LOGGER(info);
@@ -72,10 +101,11 @@ export function eventHubs({
     }
 
     async function sendBatch() {
-        let item, result = true;
-        const sent = [];
-        const items = queue.concat();
-        const batch = await hub.createBatch();
+        let item: TrackingInfo,
+            result = true;
+        const sent: TrackingInfo[] = [];
+        const items: TrackingInfo[] = queue.concat();
+        const batch: EventDataBatch = await hub.createBatch();
         while (result && (item = items.shift())) {
             result = batch.tryAdd({ body: formatter(item) });
             result ? sent.push(item) : items.unshift(item);

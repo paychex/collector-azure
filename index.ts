@@ -28,7 +28,7 @@ export interface EventHubConfiguration {
      * a payload suitable for the EventHub. If not provided, the
      * entry will be persisted as a normal JSON object.
      */
-    formatter?: (info: TrackingInfo) => Record<string, any>,
+    formatter?: (info: TrackingInfo) => any,
 
     /** @ignore */
     provider?: EventHubProvider
@@ -45,6 +45,14 @@ function CONSOLE_LOGGER(info: TrackingInfo): void {
 
 function AZURE_EVENTHUB_PROVIDER(connection: string, name: string): EventHubProducerClient {
     return new EventHubProducerClient(connection, name);
+}
+
+/** Collects {@link TrackingInfo} instances to an EventHub. */
+export interface EventHubSubscriber extends TrackingSubscriber {
+
+    /** Flushes any pending batches to the underlying EventHub collector. */
+    flush(): void
+
 }
 
 /**
@@ -71,7 +79,7 @@ function AZURE_EVENTHUB_PROVIDER(connection: string, name: string): EventHubProd
  * hub.flush();
  * ```
  */
-export function eventHub(options: Partial<EventHubConfiguration> = Object.create(null)): TrackingSubscriber {
+export function eventHub(options: Partial<EventHubConfiguration> = Object.create(null)): EventHubSubscriber {
 
     const {
         name,

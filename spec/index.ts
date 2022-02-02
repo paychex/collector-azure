@@ -1,7 +1,7 @@
 import * as expect from 'expect';
 import { Spy, spy } from '@paychex/core/test';
 
-import { eventHub, TrackingSubscriber } from '../index';
+import { eventHub, EventHubSubscriber } from '../index';
 
 type LogFunction = (...data: any[]) => void;
 
@@ -51,7 +51,7 @@ describe('collectors', () => {
         }
 
         let hub: Record<string, any>,
-            collector: TrackingSubscriber,
+            collector: EventHubSubscriber,
             provider: Spy;
 
         beforeEach(() => {
@@ -83,8 +83,8 @@ describe('collectors', () => {
 
             it('logs to console if necessary', async () => {
                 collector = eventHub();
-                collector({ type: 'event', label: 'abc' });
-                collector({ type: 'timer', label: 'def', duration: 15 });
+                collector({ type: 'event', label: 'abc' } as any);
+                collector({ type: 'timer', label: 'def', duration: 15 } as any);
                 expect((console.log as unknown as Spy).calls[0].args[0]).toBe('[EVENT] abc');
                 expect((console.log as unknown as Spy).calls[1].args[0]).toBe('[TIMER] def (15 ms)');
             });
@@ -105,7 +105,7 @@ describe('collectors', () => {
         describe('flush', () => {
 
             it('sends batch', async () => {
-                collector({ type: 'event' });
+                collector({ type: 'event' } as any);
                 await collector.flush();
                 expect(hub.sendBatch.called).toBe(true);
             });
@@ -113,7 +113,7 @@ describe('collectors', () => {
             it('logs errors to console', async () => {
                 const err = new Error();
                 hub.sendBatch.throws(err);
-                collector({ type: 'event' });
+                collector({ type: 'event' } as any);
                 await collector.flush();
                 expect((console.error as unknown as Spy).called).toBe(true);
                 expect((console.error as unknown as Spy).args).toEqual([err.message, err.stack]);
@@ -121,7 +121,7 @@ describe('collectors', () => {
 
             it('reconnects hubs on error', async () => {
                 hub.sendBatch.throws(new Error());
-                collector({ type: 'event' });
+                collector({ type: 'event' } as any);
                 await collector.flush();
                 expect(provider.callCount).toBe(2);
             });
@@ -137,7 +137,7 @@ describe('collectors', () => {
 
             it('sends batch', async () => {
                 const item = { type: 'event' };
-                collector(item);
+                collector(item as any);
                 await collector.flush();
                 expect(hub.sendBatch.called).toBe(true);
                 expect(hub.sendBatch.args[0]).toBe(hub.batch);
@@ -146,16 +146,16 @@ describe('collectors', () => {
 
             it('drops large items', async () => {
                 hub.batch.tryAdd.returns(false);
-                collector({ type: 'event' });
+                collector({ type: 'event' } as any);
                 await collector.flush();
                 expect(hub.sendBatch.called).toBe(false);
             });
 
             it('recurses until empty', async () => {
-                collector({ type: 'event' });
-                collector({ type: 'event' });
-                collector({ type: 'event' });
-                collector({ type: 'event' });
+                collector({ type: 'event' } as any);
+                collector({ type: 'event' } as any);
+                collector({ type: 'event' } as any);
+                collector({ type: 'event' } as any);
                 hub.batch.tryAdd.onCall(2).returns(false);
                 await collector.flush();
                 expect(hub.createBatch.callCount).toBe(2);
